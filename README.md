@@ -66,6 +66,41 @@ GET /users/
 GET /users/count
 ```
 
+## 🤖 ML Prediction Endpoints
+
+> **Note:** Semua endpoint prediction memerlukan Authorization header dengan Bearer token.
+
+### Single Prediction
+```
+POST /predict/
+Authorization: Bearer <token>
+Content-Type: application/json
+
+{
+    "text": "teks untuk diprediksi"
+}
+```
+
+### Batch Prediction
+```
+POST /predict/batch
+Authorization: Bearer <token>
+Content-Type: application/json
+
+{
+    "texts": ["teks 1", "teks 2", "teks 3"]
+}
+```
+
+Response:
+```json
+[
+    {"input": "teks 1", "prediction": "label1"},
+    {"input": "teks 2", "prediction": "label2"},
+    {"input": "teks 3", "prediction": "label3"}
+]
+```
+
 ## 🛠️ Tech Stack
 
 - **Framework**: FastAPI
