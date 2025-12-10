@@ -20,5 +20,8 @@ env/
 # OS
 .DS_Store
 Thumbs.db
+
+# dua file ini dah dimasukkin ke gitignore tapi tetep ke track di git
 app/routers/__pycache__/auth.cpython-314.pyc
 app/core/__pycache__/security.cpython-314.pyc
+ppd_database.db
