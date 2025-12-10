@@ -19,8 +19,19 @@ def register(data: UserCreate, db: Session = Depends(get_db)):
 
 @router.post("/login", response_model=Token)
 def login(form: OAuth2PasswordRequestForm = Depends(), db: Session = Depends(get_db)):
+    """Login dengan form-urlencoded (OAuth2 standard)"""
     user = get_user_by_username(db, form.username)
     if not user or not verify_password(form.password, user.hashed_password):
+        raise HTTPException(401, "Invalid credentials")
+
+    access_token = create_access_token(user.username)
+    return {"access_token": access_token}
+
+@router.post("/login-json", response_model=Token)
+def login_json(data: UserCreate, db: Session = Depends(get_db)):
+    """Login dengan JSON body"""
+    user = get_user_by_username(db, data.username)
+    if not user or not verify_password(data.password, user.hashed_password):
         raise HTTPException(401, "Invalid credentials")
 
     access_token = create_access_token(user.username)

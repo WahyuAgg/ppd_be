@@ -1,13 +1,8 @@
-import pymysql
-pymysql.install_as_MySQLdb()
-
 from sqlalchemy import create_engine
 from sqlalchemy.orm import sessionmaker
-from app.core.config import settings
 
-DATABASE_URL = (
-    f"mysql://{settings.DB_USER}:{settings.DB_PASS}@{settings.DB_HOST}/{settings.DB_NAME}"
-)
+# Menggunakan SQLite untuk development (tidak perlu MySQL)
+DATABASE_URL = "sqlite:///./ppd_database.db"
 
-engine = create_engine(DATABASE_URL, pool_pre_ping=True)
-SessionLocal = sessionmaker(bind=engine)
+engine = create_engine(DATABASE_URL, connect_args={"check_same_thread": False})
+SessionLocal = sessionmaker(autocommit=False, autoflush=False, bind=engine)
