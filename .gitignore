@@ -2,6 +2,8 @@
 __pycache__/
 *.py[cod]
 *$py.class
+app/routers/__pycache__/
+app/core/__pycache__/
 
 # Database
 *.db
@@ -18,3 +20,5 @@ env/
 # OS
 .DS_Store
 Thumbs.db
+app/routers/__pycache__/auth.cpython-314.pyc
+app/core/__pycache__/security.cpython-314.pyc
