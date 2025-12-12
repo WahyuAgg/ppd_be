@@ -1,6 +1,6 @@
 from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
-from app.routers import auth, users, predict
+from app.routers import auth, users, predict, music, tag, emotion_label
 from app.database.base import Base
 from app.database.session import engine
 
@@ -21,6 +21,9 @@ app.add_middleware(
 app.include_router(auth.router)
 app.include_router(users.router)
 app.include_router(predict.router)
+app.include_router(music.router)
+app.include_router(tag.router)
+app.include_router(emotion_label.router)
 
 @app.get("/")
 def root():
