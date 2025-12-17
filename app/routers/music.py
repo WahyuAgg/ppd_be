@@ -24,11 +24,12 @@ async def upload_music(
     title: str = Form(...),
     artist: Optional[str] = Form(None),
     genre: Optional[str] = Form(None),
+    emotion_label_ids: Optional[str] = Form(None),  # Comma-separated IDs
     file: UploadFile = File(...),
     db: Session = Depends(get_db),
     current_user: User = Depends(get_current_user)
 ):
-    """Upload file musik baru"""
+    """Upload file musik baru dengan emotion labels"""
     # Validasi extension file
     ext = os.path.splitext(file.filename)[1].lower()
     if ext not in ALLOWED_EXTENSIONS:
@@ -42,6 +43,14 @@ async def upload_music(
     with open(file_path, "wb") as buffer:
         shutil.copyfileobj(file.file, buffer)
     
+    # Parse emotion_label_ids
+    emotion_ids = None
+    if emotion_label_ids:
+        try:
+            emotion_ids = [int(id.strip()) for id in emotion_label_ids.split(",") if id.strip()]
+        except ValueError:
+            raise HTTPException(400, "Format emotion_label_ids tidak valid")
+    
     # Simpan ke database
     music = music_crud.create_music(
         db=db,
@@ -50,14 +59,28 @@ async def upload_music(
         genre=genre,
         file_path=file_path,
         file_name=file.filename,
-        uploaded_by=current_user.id
+        uploaded_by=current_user.id,
+        emotion_label_ids=emotion_ids
     )
     return music
 
 @router.get("/", response_model=List[MusicOut])
-def get_all_music(skip: int = 0, limit: int = 100, db: Session = Depends(get_db)):
-    """Mendapatkan daftar semua musik"""
-    return music_crud.get_all_music(db, skip, limit)
+def get_all_music(
+    skip: int = 0, 
+    limit: int = 100,
+    emotion_label_ids: Optional[str] = None,  # Comma-separated IDs for filtering
+    db: Session = Depends(get_db)
+):
+    """Mendapatkan daftar semua musik dengan filter emotion label opsional"""
+    # Parse emotion_label_ids
+    emotion_ids = None
+    if emotion_label_ids:
+        try:
+            emotion_ids = [int(id.strip()) for id in emotion_label_ids.split(",") if id.strip()]
+        except ValueError:
+            raise HTTPException(400, "Format emotion_label_ids tidak valid")
+    
+    return music_crud.get_all_music(db, skip, limit, emotion_label_ids=emotion_ids)
 
 @router.get("/{music_id}", response_model=MusicOut)
 def get_music(music_id: int, db: Session = Depends(get_db)):
@@ -86,8 +109,16 @@ def update_music(
     db: Session = Depends(get_db),
     current_user: User = Depends(get_current_user)
 ):
-    """Update data musik"""
-    music = music_crud.update_music(db, music_id, **music_update.model_dump(exclude_unset=True))
+    """Update data musik termasuk emotion labels"""
+    update_data = music_update.model_dump(exclude_unset=True)
+    emotion_ids = update_data.pop('emotion_label_ids', None)
+    
+    music = music_crud.update_music(
+        db, 
+        music_id, 
+        emotion_label_ids=emotion_ids,
+        **update_data
+    )
     if not music:
         raise HTTPException(404, "Musik tidak ditemukan")
     return music
